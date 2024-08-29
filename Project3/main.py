@@ -25,7 +25,7 @@ class UserRequest(BaseModel):
     username : str = Field(min_length=1,max_length=1000)
     first_name : str = Field(min_length=1,max_length=1000)
     last_name : str = Field(min_length=1,max_length=1000)
-    hashed_password : str = Field(min_length=1,max_length=1000)
+    password : str = Field(min_length=1,max_length=1000)
     is_active : bool = Field(default = True)
     role : str = Field(min_length=1,max_length=1000)
 
