@@ -5,11 +5,14 @@ from pydantic import BaseModel,Field
 from typing import Annotated
 from sqlalchemy.orm import Session
 from models import Todos,Users
+from passlib.context import CryptContext
+from fastapi.security import OAuth2PasswordRequestForm,OAuth2PasswordBearer
 
 app = FastAPI()
 
 models.Base.metadata.create_all(bind = engine)
 
+bcrypt_context = CryptContext(schemes=['bcrypt'],deprecated = 'auto')
 
 app = FastAPI()
 
@@ -20,7 +23,6 @@ class TodoRequest(BaseModel):
     complete : bool = Field(default=False)
 
 class UserRequest(BaseModel):
-    id : int = Field(gt = 0)
     email : str = Field(min_length=1,max_length=1000)
     username : str = Field(min_length=1,max_length=1000)
     first_name : str = Field(min_length=1,max_length=1000)
@@ -83,6 +85,14 @@ async def all_users(db : db_dependency):
 
 @app.post('/create_user')
 async def create_user(db : db_dependency,user_request : UserRequest):
-    users = Users(**user_request.model_dump())
+    users = Users(
+        email = user_request.email,
+        username = user_request.username,
+        first_name = user_request.first_name,
+        last_name = user_request.last_name,
+        hashed_password = bcrypt_context.hash(user_request.password),
+        role = user_request.role,
+        is_active = user_request.is_active)
     db.add(users)
     db.commit()
+
